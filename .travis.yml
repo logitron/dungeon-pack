@@ -1,0 +1,18 @@
+sudo: required
+
+language: node_js
+node_js:
+  - "lts/*"
+
+services:
+  - docker
+
+before_install:
+  - cd ui
+  - docker build -t dungeon-pack-ui .
+  - docker run -d dungeon-pack-ui
+  - docker ps -a
+  - docker run dungeon-pack-ui /bin/sh -c "cd /app; npm run test:unit"
+
+script:
+  - npm run test:unit
