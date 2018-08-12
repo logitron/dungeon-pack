@@ -1,18 +1,28 @@
 sudo: required
 
-language: node_js
-node_js:
-  - "lts/*"
+language: generic
+
+cache:
+  directories:
+    - ~/.npm
+    - ~/.cache
 
 services:
   - docker
 
-before_install:
+install:
   - cd ui
-  - docker build -t dungeon-pack-ui .
-  - docker run -d dungeon-pack-ui
-  - docker ps -a
-  - docker run dungeon-pack-ui /bin/sh -c "cd /app; npm run test:unit"
+  - docker pull logitron1/dungeon-pack-ui:ci
+  - docker build -f Dockerfile.ci -t dungeon-pack-ui --cache-from logitron1/dungeon-pack-ui:ci .
 
 script:
-  - npm run test:unit
+  - docker run dungeon-pack-ui npm run test:unit
+
+before_deploy:
+  - cd ..
+
+deploy:
+  provider: script
+  script: bash deploy
+  on:
+    branch: master
